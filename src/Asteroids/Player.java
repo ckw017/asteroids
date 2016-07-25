@@ -36,9 +36,9 @@ public class Player extends GameObject {
      * Applies a force in the objects current rotation
      * @param f - the force applied in pixels/second^2 (the mass of the Player is treated as 1)
      */
-    public void applyForce(int f){
+    public void applyForce(double f){
         if(f == 0){
-            scaleVelocity(.99); /*If no force is applied, the ship decelerates*/
+            scaleVelocity(.95); /*If no force is applied, the ship decelerates*/
         }
         else{
         	//Vector calculations
@@ -114,8 +114,10 @@ public class Player extends GameObject {
     
     @Override
     public void kill() {
-        isAlive = false;
-        ((Polygon)hitbox).reset();
+    	if(isAlive){
+	        isAlive = false;
+	        ((Polygon)hitbox).reset();
+    	}
     }
     
     @Override

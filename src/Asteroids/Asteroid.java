@@ -41,8 +41,10 @@ public class Asteroid extends GameObject{
 	
 	@Override
 	public void kill() {
-		((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
-		isAlive = false;
+		if(isAlive){
+			((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
+			isAlive = false;
+		}
 	}
 
 	@Override
