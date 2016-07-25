@@ -63,8 +63,10 @@ public class Projectile extends GameObject {
 	
 	@Override
 	public void kill() {
-		((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
-		isAlive = false;
+		if(isAlive){
+			((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
+			isAlive = false;
+		}
 	}
 
 	@Override
@@ -74,10 +76,12 @@ public class Projectile extends GameObject {
 	
 	@Override
 	public void travel(){
-		super.travel();
-		age++;
-		if(age > lifetime){
-			kill();
+		if(isAlive){
+			super.travel();
+			age++;
+			if(age > lifetime){
+				kill();
+			}
 		}
 	}
 
