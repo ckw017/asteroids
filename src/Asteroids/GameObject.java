@@ -14,15 +14,16 @@ import java.awt.image.BufferedImage;
  */
 @SuppressWarnings("serial")
 public abstract class GameObject extends JComponent{
-    protected int allegiance;        //The allegiance of the GameEntity, used to determine if damage is taken on collisions
+	protected int health;            //The health of the GameObject; default = 1
+    protected int allegiance;        //The allegiance of the GameObject, used to determine if damage is taken on collisions
     protected boolean isAlive;       //The status of the object; default = true
-    protected double rotation;       //The rotation of the GameEntity's sprite, in degrees; default = 0
+    protected double rotation;       //The rotation of the GameObject's sprite, in degrees; default = 0
     protected double xVelocity;      //The horizontal velocity of the object, in pixels per frame; default = 0
     protected double yVelocity;      //The vertical velocity of the object, in pixels per frame; default = 0
     protected double xCenter;        //The center x-coordinate of the object's sprite and hitbox
     protected double yCenter;        //The center y-coordinate of the object's sprite and hitbox
     protected Shape hitbox;          //The hitbox of the enemy; default = null, defined in subclasses
-    protected BufferedImage sprite;  //The sprite of the GameEntity; default = null
+    protected BufferedImage sprite;  //The sprite of the GameObject; default = null
     
     //Allegiance IDs
     final static int PLAYER = 1;
@@ -50,6 +51,15 @@ public abstract class GameObject extends JComponent{
         rotation = 0;
         xVelocity = 0;
         yVelocity = 0;
+        health = 1;
+    }
+    
+    /**
+     * Returns the hitbox of the Object
+     * @return the hitbox of the Object
+     */
+    public Shape getHitbox(){
+    	return hitbox;
     }
     
     /**
@@ -66,6 +76,27 @@ public abstract class GameObject extends JComponent{
      */
     public void setRotation(double r){
         rotation = Math.toRadians(r % 360);
+    }
+    
+    /**
+     * Sets the health of the object
+     * @param h - the desired health
+     */
+    public void setHealth(int h){
+    	health = h;
+    }
+    
+    /**
+     * Damages the object's health
+     * @param d - the amount of damage inflicted
+     * @return the mortality state of the object after being damaged
+     */
+    public boolean damage(int d){
+    	health -= d;
+    	if(health <= 0){
+    		kill();
+    	}
+    	return isAlive;
     }
     
     /**
@@ -107,38 +138,40 @@ public abstract class GameObject extends JComponent{
      */
     public void loopLocation(){
         if(xCenter < 0){
-            xCenter = 470;
+            xCenter = GamePanel.WINDOW_WIDTH;
         }
-        else if(xCenter > 470){
+        else if(xCenter > GamePanel.WINDOW_WIDTH){
             xCenter = 0;
         }
         if(yCenter < 0){
-            yCenter = 325;
+            yCenter = GamePanel.WINDOW_HEIGHT;
         }
-        else if(yCenter > 325){
+        else if(yCenter > GamePanel.WINDOW_HEIGHT){
             yCenter = 0;
         }
     }
 
     @Override
     public void paintComponent(Graphics g){
-        Graphics2D g2 = (Graphics2D)g;
-        if(sprite != null){
-            AffineTransform defaultTransform = g2.getTransform();
-            g2.rotate(rotation, xCenter, yCenter);
-            g2.drawImage(sprite, (int)(xCenter - sprite.getWidth()/2 + .5), (int)(yCenter - sprite.getHeight()/2 + .5), this);
-            g2.setTransform(defaultTransform);
-        }
-        if(this instanceof Player){
-            g2.setColor(new Color(0, 255, 0));
-        }
-        else if(this instanceof Projectile){
-            g2.setColor(new Color(0, 255, 255));
-        }
-        else if(this instanceof Asteroid){
-            g2.setColor(new Color(255, 0, 0));
-        }
-        g2.draw(hitbox);
+    	if(isAlive()){
+	        Graphics2D g2 = (Graphics2D)g;
+	        if(sprite != null){
+	            AffineTransform defaultTransform = g2.getTransform();
+	            g2.rotate(rotation, xCenter, yCenter);
+	            g2.drawImage(sprite, (int)(xCenter - sprite.getWidth()/2 + .5), (int)(yCenter - sprite.getHeight()/2 + .5), this);
+	            g2.setTransform(defaultTransform);
+	        }
+	        if(this instanceof Player){
+	            g2.setColor(new Color(0, 255, 0));
+	        }
+	        else if(this instanceof Projectile){
+	            g2.setColor(new Color(0, 255, 255));
+	        }
+	        else if(this instanceof Asteroid){
+	            g2.setColor(new Color(255, 0, 0));
+	        }
+	        g2.draw(hitbox);
+    	}
     }
     
     /**
