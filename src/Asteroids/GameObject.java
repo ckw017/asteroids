@@ -14,16 +14,18 @@ import java.awt.image.BufferedImage;
  */
 @SuppressWarnings("serial")
 public abstract class GameObject extends JComponent{
+	
 	protected int health;            //The health of the GameObject; default = 1
     protected int allegiance;        //The allegiance of the GameObject, used to determine if damage is taken on collisions
     protected boolean isAlive;       //The status of the object; default = true
-    protected double rotation;       //The rotation of the GameObject's sprite, in degrees; default = 0
+    protected double rotation;       //The rotation of the GameObject's sprite, in radians; default = 0
     protected double xVelocity;      //The horizontal velocity of the object, in pixels per frame; default = 0
     protected double yVelocity;      //The vertical velocity of the object, in pixels per frame; default = 0
     protected double xCenter;        //The center x-coordinate of the object's sprite and hitbox
     protected double yCenter;        //The center y-coordinate of the object's sprite and hitbox
     protected Shape hitbox;          //The hitbox of the enemy; default = null, defined in subclasses
     protected BufferedImage sprite;  //The sprite of the GameObject; default = null
+    protected double radius;         //The GameObject's radius, in pixels
     
     //Allegiance IDs
     final static int PLAYER = 1;
@@ -123,6 +125,14 @@ public abstract class GameObject extends JComponent{
         return this.isAlive;
     }
     
+    public double getXCenter(){
+    	return xCenter;
+    }
+    
+    public double getYCenter(){
+    	return yCenter;
+    }
+    
     /**
      * Moves the object's and hitbox based on its current velocities, meant to be invoked once per frame
      */
@@ -137,17 +147,17 @@ public abstract class GameObject extends JComponent{
      * Moves the object back into the frame on the opposite side, if it moves outside of set boundaries
      */
     public void loopLocation(){
-        if(xCenter < 0){
-            xCenter = GamePanel.WINDOW_WIDTH;
+        if(xCenter < -radius){
+            xCenter = GamePanel.WINDOW_WIDTH + radius;
         }
-        else if(xCenter > GamePanel.WINDOW_WIDTH){
-            xCenter = 0;
+        else if(xCenter > GamePanel.WINDOW_WIDTH + radius){
+            xCenter = -radius;
         }
-        if(yCenter < 0){
-            yCenter = GamePanel.WINDOW_HEIGHT;
+        if(yCenter < -radius){
+            yCenter = GamePanel.WINDOW_HEIGHT + radius;
         }
-        else if(yCenter > GamePanel.WINDOW_HEIGHT){
-            yCenter = 0;
+        else if(yCenter > GamePanel.WINDOW_HEIGHT + radius){
+            yCenter = -radius;
         }
     }
 
@@ -161,16 +171,18 @@ public abstract class GameObject extends JComponent{
 	            g2.drawImage(sprite, (int)(xCenter - sprite.getWidth()/2 + .5), (int)(yCenter - sprite.getHeight()/2 + .5), this);
 	            g2.setTransform(defaultTransform);
 	        }
-	        if(this instanceof Player){
-	            g2.setColor(new Color(0, 255, 0));
+	        if(Asteroids.DRAW_HITBOXES){
+		        if(this instanceof Player){
+		            g2.setColor(new Color(0, 255, 0));
+		        }
+		        else if(this instanceof Projectile){
+		            g2.setColor(new Color(0, 255, 255));
+		        }
+		        else if(this instanceof Asteroid){
+		            g2.setColor(new Color(255, 0, 0));
+		        }
+		        g2.draw(hitbox);
 	        }
-	        else if(this instanceof Projectile){
-	            g2.setColor(new Color(0, 255, 255));
-	        }
-	        else if(this instanceof Asteroid){
-	            g2.setColor(new Color(255, 0, 0));
-	        }
-	        g2.draw(hitbox);
     	}
     }
     
@@ -183,4 +195,6 @@ public abstract class GameObject extends JComponent{
      * Adjusts the hitbox of the object when the travel method is invoked
      */
     public abstract void adjustHitbox();
+    
+    public abstract double getRadius();
 }

@@ -6,8 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-
 import javax.swing.JFrame;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 public class GameFrame extends JFrame{
@@ -52,6 +52,10 @@ public class GameFrame extends JFrame{
     	gamePanel.addObject(p);
     }
     
+    public void addObject(ArrayList<Asteroid> a){
+    	gamePanel.addObject(a);
+    }
+    
     public static GameFrame createAndShowGUI(){
     	return new GameFrame();
     }
@@ -77,6 +81,7 @@ public class GameFrame extends JFrame{
     }
     
     class InputListener implements KeyListener{
+    	private boolean shotReleased = true;
         private char LEFT  = 'a'; //The character binded to turning left
         private char RIGHT = 'd'; //The character binded to turning right
         private char MOVE = 's';  //The character binded to applying force
@@ -106,7 +111,12 @@ public class GameFrame extends JFrame{
                 isMoving = true;
             }
             if(e.getKeyCode() == KeyEvent.VK_ENTER){
-                addObject(player.shoot());
+            	if(player != null){
+	            	if(shotReleased && player.isAlive()){
+	            		addObject(player.shoot());
+	            		shotReleased = false;
+	            	}
+            	}
             }
         }
 
@@ -127,6 +137,10 @@ public class GameFrame extends JFrame{
             }
             if(charReleased == MOVE && isMoving){
                 isMoving = false;
+            }
+            
+            if(e.getKeyCode() == KeyEvent.VK_ENTER){
+            	shotReleased = true;
             }
         }
         

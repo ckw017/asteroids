@@ -12,6 +12,9 @@ public class GamePanel extends JPanel {
 	private ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 	private ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 	private ArrayList<GameObject> objects = new ArrayList<GameObject>();
+	private ArrayList<GameObject> playerObjects = new ArrayList<GameObject>();
+	private ArrayList<GameObject> enemyObjects = new ArrayList<GameObject>();
+	
 	private Player player;
 
     public final static int WINDOW_WIDTH = 550;
@@ -32,13 +35,34 @@ public class GamePanel extends JPanel {
 		objects.add(a);
 	}
 	
+	public void addObject(ArrayList<Asteroid> asteroids){
+		for(Asteroid a: asteroids){
+			addObject(a);
+		}
+	}
+	
 	public void addObject(Projectile p){
 		projectiles.add(p);
 		objects.add(p);
+		if(p.getAllegiance() == GameObject.PLAYER){
+			playerObjects.add(p);
+		}
+		else{
+			enemyObjects.add(p);
+		}
+	}
+	
+	public ArrayList<GameObject> getPlayerObjects(){
+		return playerObjects;
+	}
+
+	public ArrayList<GameObject> getEnemyObjects(){
+		return enemyObjects;
 	}
 	
 	public void setPlayer(Player p){
 		player = p;
+		playerObjects.add(p);
 	}
 	
 	public ArrayList<Asteroid> getAsteroids(){
@@ -69,6 +93,18 @@ public class GamePanel extends JPanel {
         for(int i = asteroids.size() - 1; i >= 0; i--){
             if(!asteroids.get(i).isAlive()){
                 asteroids.remove(i);
+            }
+        }
+        
+        for(int i = playerObjects.size() - 1; i >= 0; i--){
+            if(!playerObjects.get(i).isAlive()){
+            	playerObjects.remove(i);
+            }
+        }
+        
+        for(int i = enemyObjects.size() - 1; i >= 0; i--){
+            if(!enemyObjects.get(i).isAlive()){
+            	enemyObjects.remove(i);
             }
         }
 	}

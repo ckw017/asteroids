@@ -8,7 +8,6 @@ import java.awt.geom.Ellipse2D;
  */
 @SuppressWarnings("serial")
 public class Projectile extends GameObject {
-	private double radius;   //The Projectile's hitbox's radius in pixels
 	private double velocity; //The Projectile's velocity in pixels per frame
 	private int lifetime;    //The Projectile's lifetime in frames
 	private int age = 0;     //The Projectile's age in frames
@@ -56,9 +55,18 @@ public class Projectile extends GameObject {
 		radius = p.radius;
 		velocity = p.velocity;
 		lifetime = p.lifetime;
+		sprite = p.sprite;
 		hitbox = new Ellipse2D.Double(xCenter - radius, yCenter - radius, 2 * radius, 2 * radius);
 		xVelocity = Math.cos(Math.toRadians(angle)) * p.velocity;
 		yVelocity = Math.sin(Math.toRadians(angle)) * p.velocity;
+	}
+	
+	public boolean intersects(GameObject o){
+		return radius + o.getRadius() > Math.sqrt(Math.pow(xCenter - o.getXCenter(), 2) + Math.pow(yCenter - o.getYCenter(), 2));
+	}
+	
+	public double getRadius(){
+		return radius;
 	}
 	
 	@Override
