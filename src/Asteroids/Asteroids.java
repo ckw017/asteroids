@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
 public class Asteroids {
+	public static boolean DRAW_HITBOXES = true;
 	public static Player player;
 	
 	public static GameFrame frame = GameFrame.createAndShowGUI();
@@ -11,12 +12,15 @@ public class Asteroids {
 	public static ArrayList<GameObject> objects = panel.getObjects();
 	
 	public static void main(String args[]){
-		player =  new Player(210, 300, 25, 25, 20);
-		player.setProjectile(2, 5, 100);
-		//player.setSprite(Tools.getImage("player.png"));
+		player =  new Player(225, 210, 25, 25, 20);
+		player.setProjectile(2, 10, 30);
+		player.setSprite(Tools.getImage("player.png"));
+		player.setHealth(10000000);
 		
-		frame.addObject(new Asteroid(210, 300, 20, 45, 5));
-		frame.addObject(new Asteroid(210, 300, 20, -30, 10));
+		frame.addObject(Asteroid.generateAsteroid(3, 225, 210, 100));
+		frame.addObject(Asteroid.generateAsteroid(3, 225, 210, 100));
+		frame.addObject(Asteroid.generateAsteroid(3, 225, 210, 100));
+		frame.addObject(Asteroid.generateAsteroid(3, 225, 210, 100));
 		
 		frame.setPlayer(player);
 		while(true){
@@ -30,14 +34,12 @@ public class Asteroids {
 	}
 	
 	public static class MainThread extends Thread{
-		public MainThread(){
-			
-		}
 		
 		public void run(){
 			while(true){
 				moveNPCs();
 				movePlayer();
+				handleCollisions();
 				panel.flush();
 				frame.repaint();
 				trySleep(40);
@@ -62,20 +64,31 @@ public class Asteroids {
 	
 	public static void movePlayer(){
 		if(frame.playerIsMoving()){
-			player.applyForce(.5);
+			player.applyForce(1);
 		}
 		else{
 			player.applyForce(0);
 		}
 		player.travel();
-		player.rotate(frame.getDirection() * 5);
+		player.rotate(frame.getDirection() * 15);
 	}
 	
 	public static void handleCollisions(){
-		//for(Projectile p : panel.getProjectiles()){
-			//for(Asteroid a: panel.getAsteroids()){
-				//if(p.getHitbox().intersects)
-			//}
-		//}
+		for(GameObject p : panel.getPlayerObjects()){
+			for(Asteroid a: panel.getAsteroids()){
+				if(p instanceof Player && ((Player)p).intersects(a) && p.isAlive() && a.isAlive()){
+					p.damage(1);
+					if(!a.damage(1)){
+						frame.addObject(a.split(32));
+					}
+				}
+				else if(p instanceof Projectile && ((Projectile)p).intersects(a) && p.isAlive() && a.isAlive()){
+					p.damage(1);
+					if(!a.damage(1)){
+						frame.addObject(a.split(32));
+					}
+				}
+			}
+		}
 	}
 }
