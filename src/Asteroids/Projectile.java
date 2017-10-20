@@ -1,96 +1,86 @@
-package Asteroids;
+package asteroids;
 
+import java.awt.Color;
 import java.awt.geom.Ellipse2D;
-/**
- * A GameObject intended to be used by the player to shoot Asteroids and Enemies
- * @author ckw017
- *
- */
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @SuppressWarnings("serial")
 public class Projectile extends GameObject {
-	private double velocity; //The Projectile's velocity in pixels per frame
-	private int lifetime;    //The Projectile's lifetime in frames
-	private int age = 0;     //The Projectile's age in frames
-	
-	/**
-	 * Constructs a basic Projectile intended for cloning at different locations and angles
-	 * @param r - the radius of the Projectile's hitbox in pixels
-	 * @param v - the velocity of the Projectile in pixels per frame
-	 * @param l - the lifetime of the Projectile in frames
-	 */
-	public Projectile(double r, double v, int l){
-		radius = r;
-		velocity = v;
-		lifetime = l;
-	}
-	
-	/**
-	 * Constructs an active Projectile
-	 * @param x - the x-coordinate of the Projectile
-	 * @param y - the y-coordinate of the Projectile
-	 * @param r - the radius of the Projectile's hitbox
-	 * @param angle - the angle of the Projectile's trajectory in degrees
-	 * @param v - the velocity of the Projectile in pixels per frame
-	 * @param l - the lifetime of the Projectile in frames
-	 */
-	public Projectile(double x, double y, double r, double angle, double v, int l){
-		super(x, y, PLAYER);
-		radius = r;
-		velocity = v;
-		lifetime = l;
-		hitbox = new Ellipse2D.Double(xCenter - radius, yCenter - radius, 2 * radius, 2 * radius);
-		xVelocity = Math.cos(Math.toRadians(angle)) * velocity;
-		yVelocity = Math.cos(Math.toRadians(angle)) * velocity;
-	}
-	
-	/**
-	 * Clones an existing Projectile and translates it to a new position and trajectory
-	 * @param p - an existing Projectile intended to be cloned
-	 * @param x - the new x-coordinate of the Projectile
-	 * @param y - the new y-coordinate of the Projectile
-	 * @param angle - the new angle of the Projectile
-	 */
-	public Projectile(Projectile p, double x, double y, double angle){
-		super(x, y, PLAYER);
-		radius = p.radius;
-		velocity = p.velocity;
-		lifetime = p.lifetime;
-		sprite = p.sprite;
-		hitbox = new Ellipse2D.Double(xCenter - radius, yCenter - radius, 2 * radius, 2 * radius);
-		xVelocity = Math.cos(Math.toRadians(angle)) * p.velocity;
-		yVelocity = Math.sin(Math.toRadians(angle)) * p.velocity;
-	}
-	
-	public boolean intersects(GameObject o){
-		return radius + o.getRadius() > Math.sqrt(Math.pow(xCenter - o.getXCenter(), 2) + Math.pow(yCenter - o.getYCenter(), 2));
-	}
-	
-	public double getRadius(){
-		return radius;
-	}
-	
-	@Override
-	public void kill() {
-		if(isAlive){
-			((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
-			isAlive = false;
-		}
-	}
+  public static BufferedImage spr1 = getSprite("playerProj1.png");
+  public static BufferedImage spr2 = getSprite("playerProj2.png");
 
-	@Override
-	public void adjustHitbox() {
-		((Ellipse2D)hitbox).setFrame(xCenter - radius, yCenter - radius, 2 * radius, 2 * radius);
-	}
-	
-	@Override
-	public void travel(){
-		if(isAlive){
-			super.travel();
-			age++;
-			if(age > lifetime){
-				kill();
-			}
-		}
-	}
+  public int lt = SaveUtility.PROJECTILE_LIFETIME;
+  public int age = 0;
+  public int spd = SaveUtility.PROJECTILE_SPEED;
+  public short pid;
+  public int projID;
+  public static ArrayList<Integer> counters =
+      new ArrayList<Integer>(Arrays.asList(0, 0, 0, 0, 0, 0));
 
+  public Projectile(short ownerID) {
+    super(false);
+    pid = ownerID;
+    radius = SaveUtility.PROJECTILE_RADIUS;
+    hp = SaveUtility.PROJECTILE_HEALTH;
+    setGraphics();
+  }
+
+  public Projectile(Projectile p, double xPosition, double yPosition, double angle) {
+    super(false);
+    pid = p.pid;
+    projID = counters.get(pid - 1);
+    projID = counters.set(pid - 1, counters.get(pid - 1) + 1);
+    radius = p.radius;
+    lt = p.lt;
+    spd = p.spd;
+    x = xPosition;
+    y = yPosition;
+    hb = new Ellipse2D.Double(x, y, radius * 2, radius * 2);
+    rotation = angle;
+    hbColor = p.hbColor;
+    sprite = p.sprite;
+    xv = spd * Math.cos(Math.toRadians(angle - 90));
+    yv = spd * Math.sin(Math.toRadians(angle - 90));
+  }
+
+  public Projectile(ProjectileUpdate u) {
+    super(false);
+    objectID = u.objectID;
+    pid = u.pid;
+    projID = u.projID;
+    radius = SaveUtility.PROJECTILE_RADIUS;
+    hp = SaveUtility.PROJECTILE_HEALTH;
+    hb = new Ellipse2D.Double(x, y, radius * 2, radius * 2);
+    setGraphics();
+    x = u.x;
+    y = u.y;
+    xv = u.xv;
+    yv = u.yv;
+    rotation = u.rot;
+  }
+
+  public void setGraphics() {
+    if (pid == 1) {
+      hbColor = new Color(0, 255, 255);
+      sprite = spr1;
+    } else if (pid == 2) {
+      hbColor = new Color(255, 255, 0);
+      sprite = spr2;
+    } else if (pid >= 3) {
+      hbColor = new Color(0, 255, 255);
+      sprite = spr1;
+    }
+  }
+
+  @Override
+  public void travel() {
+    super.travel();
+    age++;
+    if (age >= lt) {
+      isAlive = false;
+      handleBuckets();
+    }
+  }
 }

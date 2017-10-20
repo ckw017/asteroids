@@ -1,0 +1,49 @@
+<<SETTINGS>>
+Delete file and run game to reset to default settings.
+booleans-> 0 = false; 1 = true
+
+<GAME VALUES>
+Number of Players (int): 1
+Local Multiplayer (boolean): 0
+LAN Multiplayer (boolean): 0
+PvP (boolean): 0
+Auto reset (boolean): 1
+Bucket size (int): 75
+
+<DISPLAY>
+Full screen (boolean): 1
+Window width (pixels): 600
+Window height (pixels): 480
+Draw hitboxes (boolean): 1
+Draw sprites (boolean): 0
+Draw buckets (boolean): 0
+
+<ASTEROIDS>
+Asteroid split factor (int): 32
+Asteroid base speed (pixels/frame): 2
+Asteroid speed range (pixels/frame): 5
+Asteroid count (int): 16
+Float velocities (boolean): 1
+
+<PLAYER>
+Player invulnerability (bool): 1
+Player respawn (boolean): 0
+Shooting delay (frames): 0
+Player max speed (pixels per frame): 35
+Player thrust (mass*pixels/frame^2): 3
+Player friction coefficient (double): .95
+Player health (hitpoints): 1
+Player turn speed (degrees per frame): 14.5
+
+<PLAYER PROJECTILE>
+Projectile speed(pixels/frame): 15
+Projectile lifetime(frames): 90
+Projectile radius(pixels): 2
+Projectile health (hitpoints): 10000
+
+<MISCELLANEOUS>
+Just a prank bro: 0
+Smart graphics (for stupid people): 0
+Skittle mode: 1
+Custom settings file (boolean): 0
+Setting file name (path): asteroids_settings.txt

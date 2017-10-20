@@ -1,110 +1,145 @@
-package Asteroids;
+package asteroids;
+
+import java.awt.Color;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
-/**
- * A non-controllable GameObject capable of collision with and destruction by the player
- * @author ckw017
- */
-@SuppressWarnings("serial")
-public class Asteroid extends GameObject{
-	private double rotationSpd;  //The Asteroid's sprite's rotation speed in degrees per frame
-	private int size;
 
-	/**
-	 * Constructs an Asteroid object
-	 * @param x - the x-coordinate of the Asteroid's center
-	 * @param y - the y-coordinate of the Asteroid's center
-	 * @param r - the radius of the Asteroid's hitbox in pixels
-	 * @param angle - the angle of the Asteroid's movement in degrees
-	 * @param v - the velocity of the Asteroid in pixels per frame
-	 */
-	public Asteroid(double x, double y, double angle, double v, int s){
-		super(x, y, NEUTRAL);
-		xVelocity = Math.cos(Math.toRadians(angle)) * v;
-		yVelocity = Math.sin(Math.toRadians(angle)) * v;
-		setSize(s);
-		hitbox = new Ellipse2D.Double(x - radius, y - radius, 2 * radius, 2 * radius);
-	}
-	
-	public ArrayList<Asteroid> split(int splitNum){
-		ArrayList<Asteroid> splits = new ArrayList<Asteroid>();
-		if(size < 2){
-			return splits;
-		}
-		for(int i = 0; i < splitNum; i++){
-			splits.add(generateAsteroid(size - 1, xCenter, yCenter));
-		}
-		return splits;
-	}
-	
-	/**
-	 * Sets the rotation speed of the Asteroid
-	 * @param rs - the rotation speed, in pixels per frame
-	 */
-	public void setRotationSpeed(double rs){
-		rotationSpd = rs;
-	}
-	
-	public void setSize(int s){
-		size = s;
-		if(size <= 0){
-			this.kill();
-		}
-		else if(size == 1){
-			radius = 10;
-			setSprite(Tools.getImage("aster2.png"));
-		}
-		else if(size == 2){
-			radius = 20;
-			setSprite(Tools.getImage("aster1.png"));
-		}
-		else{
-			radius = 30;
-			setSprite(Tools.getImage("aster3.png"));
-		}
-	}
-	
-	public double getRadius(){
-		return radius;
-	}
-	
-	public static Asteroid generateAsteroid(int size, int xVoid, int yVoid, int rVoid){
-		int x, y;
-		Random gen = new Random();
-		do{
-			x = gen.nextInt(GamePanel.WINDOW_WIDTH);
-			y = gen.nextInt(GamePanel.WINDOW_HEIGHT);
-		}while(Math.sqrt(Math.pow(xVoid - x, 2) + Math.pow(yVoid - y, 2)) < rVoid);
-		return generateAsteroid(size, x, y);
-	}
-	
-	public static Asteroid generateAsteroid(int size, double x, double y){
-		Random gen = new Random();
-		int speedBound = (int)(8.0/size);
-		int velocity = gen.nextInt(speedBound) + 3;
-		Asteroid a = new Asteroid(x, y, gen.nextInt(360), velocity, size);
-		a.setRotationSpeed(velocity);
-		return a;
-	}
-	
-	@Override
-	public void travel(){
-		super.travel();
-		rotate(rotationSpd);
-	}
-	
-	@Override
-	public void kill() {
-		if(isAlive){
-			((Ellipse2D)hitbox).setFrame(0, 0, 0, 0);
-			isAlive = false;
-		}
-	}
+public class Asteroid extends GameObject {
+  public static BufferedImage spr1 = getSprite("aster1.png");
+  public static BufferedImage spr2 = getSprite("aster2.png");
+  public static BufferedImage spr3 = getSprite("aster3.png");
+  public static Random gen = new Random();
 
-	@Override
-	public void adjustHitbox() {
-		((Ellipse2D)hitbox).setFrame(xCenter - radius, yCenter - radius, 2 * radius, 2 * radius);
-	}
+  public double rotSpd;
+  public short size;
 
+  public Asteroid(double xPosition, double yPosition, short asteroidSize) {
+    super();
+    x = xPosition;
+    y = yPosition;
+    setSize(asteroidSize);
+    int angle = gen.nextInt(360);
+    double speed = generateSpeed();
+    xv = Math.cos(Math.toRadians(angle)) * speed;
+    yv = Math.sin(Math.toRadians(angle)) * speed;
+    rotSpd = speed;
+    setGraphics(angle);
+  }
+
+  public Asteroid(AsteroidUpdate u) {
+    super();
+    objectID = u.objectID;
+    x = u.x;
+    y = u.y;
+    xv = u.xv;
+    yv = u.yv;
+    rotSpd = u.rotSpd;
+    setSize(u.s);
+    setGraphics((int) Math.toDegrees(Math.atan2(yv, xv)));
+  }
+
+  public void setGraphics(int angle) {
+    if (SaveUtility.ASTEROID_RAINBOW) {
+      hbColor = generateColor(angle);
+    } else {
+      hbColor = Color.RED;
+    }
+  }
+
+  public void setSize(short s) {
+    size = s;
+    if (size <= 0) {
+      isAlive = false;
+    } else if (size == 1) {
+      radius = 10;
+      sprite = spr1;
+    } else if (size == 2) {
+      radius = 20;
+      sprite = spr2;
+    } else {
+      radius = 30;
+      sprite = spr3;
+    }
+    hb = new Ellipse2D.Double(x - radius, y - radius, radius * 2, radius * 2);
+  }
+
+  public Color generateColor(int angle) {
+    double r = 255 - Math.abs(-angle / 90.0 * 255) + 127;
+    if (angle > 180) {
+      r = 255 - Math.abs((360 - angle) / 90.0 * 255) + 127;
+    }
+    double g = 255 - Math.abs((120 - angle) / 120.0 * 255) + 127;
+    if (angle < 60) {
+      g = 255 - Math.abs((540 - angle) / 120.0 * 255) + 127;
+    }
+    double b = 255 - Math.abs((240 - angle) / 120.0 * 255) + 127;
+    if (angle < 180 & angle > 120) {
+      b = 255 - Math.abs((240 - angle) / 120.0 * 255) + 127;
+    }
+    r = (r < 0) ? 0 : ((r > 255) ? 255 : r);
+    g = (g < 0) ? 0 : ((g > 255) ? 255 : g);
+    b = (b < 0) ? 0 : ((b > 255) ? 255 : b);
+    return new Color((int) r, (int) g, (int) b);
+  }
+
+  public double generateSpeed() {
+    int speedBound = (int) (SaveUtility.ASTEROID_SPEED_RANGE / size);
+    double spd;
+    if (speedBound > 0) {
+      if (SaveUtility.ASTEROID_FLOAT_VELOCITIES) {
+        spd = gen.nextDouble() * speedBound + SaveUtility.ASTEROID_BASE_SPEED;
+      } else {
+        spd = gen.nextInt(speedBound) + SaveUtility.ASTEROID_BASE_SPEED;
+      }
+    } else {
+      spd = SaveUtility.ASTEROID_BASE_SPEED;
+    }
+    return spd;
+  }
+
+  public ArrayList<Asteroid> split() {
+    ArrayList<Asteroid> splits = new ArrayList<Asteroid>();
+    if (size < 2) {
+      return splits;
+    }
+    for (int i = 0; i < SaveUtility.ASTEROID_SPLIT_FACTOR; i++) {
+      splits.add(new Asteroid(x, y, (short) (size - 1)));
+    }
+    return splits;
+  }
+
+  public static Asteroid generateAsteroid(short size, int rVoid, ArrayList<Player> players) {
+    int xPos = 0, yPos = 0;
+    double radius = rVoid;
+    int count = 1;
+    Random gen = new Random();
+    boolean validPos = false;
+    while (!validPos) {
+      xPos = gen.nextInt(SaveUtility.SCREEN_WIDTH);
+      yPos = gen.nextInt(SaveUtility.SCREEN_HEIGHT);
+      check:
+      for (Player p : players) {
+        if (Math.pow(p.x - xPos, 2) + Math.pow(p.y - yPos, 2) < radius * radius) {
+          validPos = false;
+          count++;
+          break check;
+        } else {
+          validPos = true;
+        }
+      }
+      count %= 100;
+      if (count == 0) {
+        radius *= .8;
+      }
+    }
+    return new Asteroid(xPos, yPos, size);
+  }
+
+  @Override
+  public void travel() {
+    super.travel();
+    rotation += rotSpd;
+  }
 }
