@@ -7,230 +7,83 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 @SuppressWarnings("serial")
 public class GameFrame extends JFrame {
-
-  private GamePanel gamePanel = new GamePanel();
-  public static String WINDOW_TITLE = "Asteroids";
-  public static final int WINDOW_WIDTH = SaveUtility.SCREEN_WIDTH;
-  public static final int WINDOW_HEIGHT = SaveUtility.SCREEN_HEIGHT;
+  public ObjectHandler handler;
   public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
-  private Player player;
-  private Player player2;
-  private boolean multiplayer;
+  public State state;
+  public int counter = 0;
 
-  public GameFrame() {
+  public enum State {
+    START_MENU,
+    GAME_STATE,
+    GAME_OVER,
+    VICTORY,
+    PLAYER_1_WIN,
+    PLAYER_2_WIN,
+    PLAYER_3_WIN;
+  }
+
+  public State[] pvp_wins =
+      new State[] {State.PLAYER_1_WIN, State.PLAYER_2_WIN, State.PLAYER_3_WIN};
+
+  public GameFrame(ObjectHandler handler) {
     super();
-    setLayout(new FlowLayout());
-    add(gamePanel);
-    setTitle(WINDOW_TITLE);
-    setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    if (SaveUtility.FULL_SCREEN) {
-      setExtendedState(JFrame.MAXIMIZED_BOTH);
-      setSize(
-          (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(),
-          (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
-      setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
-    } else {
-      int x = (int) ((SCREEN_SIZE.getWidth() - getWidth()) / 2);
-      int y = (int) ((SCREEN_SIZE.getHeight() - getHeight()) / 2);
-      setLocation(x, y);
+    this.setLayout(new FlowLayout());
+    this.handler = handler;
+    this.add(new GamePanel(this));
+    this.setTitle("Asteroids");
+    this.setSize(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT);
+    this.adjustScreen();
+    this.setResizable(false);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.addKeyListener(new InputListener());
+    this.getContentPane().setBackground(Color.black);
+    this.setIconImage(IOTools.getImage("icon_small.png"));
+    this.setVisible(true);
+    this.setStartMenu();
+  }
+
+  public void setStartMenu() {
+    this.state = State.START_MENU;
+    for (Player p : handler.players) {
+      p.rotation_direction = 2 * (p.playerID % 2) - 1;
+      p.is_shooting = true;
+      p.is_invulnerable = true;
     }
-    setIcon();
-    setVisible(true);
-    setResizable(false);
-    getContentPane().setBackground(Color.black);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    addKeyListener(new InputListener());
+  }
+
+  public void setIntermission(State next_state) {
+    for (Player p : this.handler.players) {
+      if (p.is_alive) {
+        p.is_shooting = true;
+        p.is_boosting = true;
+        p.is_invulnerable = true;
+        p.rotation_direction = 2 * (p.playerID % 2) - 1;
+      }
+    }
+    this.state = next_state;
+    this.counter = 0;
+  }
+
+  public void adjustScreen() {
+    if (Settings.FULL_SCREEN_WINDOWED) {
+      this.setSize(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT);
+      this.setPreferredSize(new Dimension(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT));
+    } else if (Settings.FULL_SCREEN_BORDERLESS) {
+      this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      this.setUndecorated(true);
+    } else {
+      this.setLocation(SCREEN_SIZE.width / 2 - getSize().width / 2, SCREEN_SIZE.height / 5);
+    }
   }
 
   public GameFrame(boolean invis) {
     super();
     setVisible(false);
-  }
-
-  public GamePanel getGamePanel() {
-    return gamePanel;
-  }
-
-  public void setIcon() {
-    try {
-      setIconImage(ImageIO.read(new File("resources/icon2.png")));
-    } catch (IOException exc) {
-      exc.printStackTrace();
-    }
-  }
-
-  public void setPlayer(Player p) {
-    player = p;
-  }
-
-  public void setPlayerTwo(Player p) {
-    player2 = p;
-    multiplayer = SaveUtility.LOCAL_MULTIPLAYER;
-    if (multiplayer && SaveUtility.LAN_MULTIPLAYER) {
-      System.out.println("NOTE: LAN AND LOCAL MULTIPLAYER ARE BOTH ON");
-    }
-  }
-
-  public void addObject(GameObject o) {
-    gamePanel.addObject(o);
-  }
-
-  public static GameFrame createAndShowGUI() {
-    return new GameFrame();
-  }
-
-  class InputListener implements KeyListener {
-    private char LEFT = 'a'; //The character binded to turning left
-    private char RIGHT = 'd'; //The character binded to turning right
-    private char MOVE = 's'; //The character binded to applying force
-    private char STATIC = 's';
-    private char rotationDirection = 's';
-    private char secondaryDirection = STATIC; //The secondary direction of turning
-    private char rotationDirection2 = 's';
-    private char secondaryDirection2 = STATIC; //The secondary direction of turning
-
-    public void keyPressed(KeyEvent e) {
-      char charPressed = e.getKeyChar();
-      if (charPressed == 'r') {
-        //Asteroids.reset();
-      }
-      if (rotationDirection == STATIC) {
-        if (charPressed == LEFT) {
-          rotationDirection = LEFT;
-          player.rotDir = -1;
-        }
-        if (charPressed == RIGHT) {
-          rotationDirection = RIGHT;
-          player.rotDir = 1;
-        }
-      } else {
-        if (charPressed == LEFT && rotationDirection != LEFT) {
-          secondaryDirection = LEFT;
-        }
-        if (charPressed == RIGHT && rotationDirection != RIGHT) {
-          secondaryDirection = RIGHT;
-        }
-      }
-      if (charPressed == MOVE && !player.isMoving) {
-        player.isMoving = true;
-      }
-      if (e.getKeyCode() == KeyEvent.VK_ENTER
-          || e.getKeyCode() == KeyEvent.VK_SPACE
-          || charPressed == 'w') {
-        if (player != null) {
-          if (!player.isShooting && player.isAlive) {
-            player.isShooting = true;
-          }
-        }
-      }
-      if (multiplayer) {
-        if (rotationDirection2 == STATIC) {
-          if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            rotationDirection2 = KeyEvent.VK_LEFT;
-            player2.rotDir = -1;
-          }
-          if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            rotationDirection2 = KeyEvent.VK_RIGHT;
-            player2.rotDir = 1;
-          }
-        } else {
-          if (e.getKeyCode() == KeyEvent.VK_LEFT && rotationDirection2 != KeyEvent.VK_LEFT) {
-            secondaryDirection2 = KeyEvent.VK_LEFT;
-          }
-          if (e.getKeyCode() == KeyEvent.VK_RIGHT && rotationDirection2 != KeyEvent.VK_RIGHT) {
-            secondaryDirection2 = KeyEvent.VK_RIGHT;
-          }
-        }
-        if (e.getKeyCode() == KeyEvent.VK_DOWN && !player2.isMoving) {
-          player2.isMoving = true;
-        }
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-          if (player2 != null) {
-            if (!player2.isShooting && player2.isAlive) {
-              player2.isShooting = true;
-            }
-          }
-        }
-      }
-    }
-
-    public void keyReleased(KeyEvent e) {
-      char charReleased = e.getKeyChar();
-      if (rotationDirection != STATIC) {
-        if ((charReleased == LEFT) && rotationDirection == LEFT) {
-          rotationDirection = secondaryDirection;
-          player.rotDir = translateDirection(secondaryDirection);
-          secondaryDirection = STATIC;
-        } else if ((charReleased == RIGHT) && rotationDirection == RIGHT) {
-          rotationDirection = secondaryDirection;
-          player.rotDir = translateDirection(secondaryDirection);
-          secondaryDirection = STATIC;
-        } else {
-          secondaryDirection = STATIC;
-        }
-      }
-      if (charReleased == MOVE && player.isMoving) {
-        player.isMoving = false;
-      }
-
-      if (e.getKeyCode() == KeyEvent.VK_ENTER
-          || e.getKeyCode() == KeyEvent.VK_SPACE
-          || charReleased == 'w') {
-        player.isShooting = false;
-      }
-      if (multiplayer) {
-        if (rotationDirection2 != STATIC) {
-          if (e.getKeyCode() == KeyEvent.VK_LEFT && rotationDirection2 == KeyEvent.VK_LEFT) {
-            rotationDirection2 = secondaryDirection2;
-            player2.rotDir = translateDirection(secondaryDirection2);
-            secondaryDirection2 = STATIC;
-          } else if (e.getKeyCode() == KeyEvent.VK_RIGHT
-              && rotationDirection2 == KeyEvent.VK_RIGHT) {
-            rotationDirection2 = secondaryDirection2;
-            player2.rotDir = translateDirection(secondaryDirection2);
-            secondaryDirection2 = STATIC;
-          } else {
-            secondaryDirection2 = STATIC;
-          }
-        }
-        if (e.getKeyCode() == KeyEvent.VK_DOWN && player2.isMoving) {
-          player2.isMoving = false;
-        }
-
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-          player2.isShooting = false;
-        }
-      }
-    }
-
-    public void keyTyped(KeyEvent e) {}
-
-    public short translateDirection(char c) {
-      if (c == 'd' || c == KeyEvent.VK_RIGHT) {
-        return 1;
-      } else if (c == 'a' || c == KeyEvent.VK_LEFT) {
-        return -1;
-      } else {
-        return 0;
-      }
-    }
-
-    public void reset() {
-      STATIC = 's';
-      rotationDirection = 's';
-      secondaryDirection = STATIC; //The secondary direction of turning
-      rotationDirection2 = 's';
-      secondaryDirection2 = STATIC; //The secondary direction of turning
-    }
   }
 
   public static Insets getFrameInsets() {
@@ -239,17 +92,186 @@ public class GameFrame extends JFrame {
     return g.getInsets();
   }
 
-  public void resetKeyListener() {
-    for (KeyListener k : getKeyListeners()) {
-      if (k instanceof InputListener) {
-        ((InputListener) k).reset();
-        break;
+  public void update() {
+    this.repaint();
+    this.counter++;
+    if (state == State.GAME_STATE) {
+      Player p1 = handler.players.get(0);
+      if (Settings.LOCAL_MULTIPLAYER) {
+        multiplayerUpdate();
+      } else {
+        if (!p1.is_alive) {
+          this.setIntermission(State.GAME_OVER);
+        }
+        if (handler.asteroids.size() == 0) {
+          this.setIntermission(State.VICTORY);
+        }
+      }
+      if (Settings.PRANK && handler.asteroids.size() == 1) {
+        Asteroid a = handler.asteroids.get(0);
+        a.size = 2;
+        a.health = 5;
+        a.split_factor = 2048;
+        Settings.PRANK = false;
       }
     }
   }
 
+  public void multiplayerUpdate() {
+    int alive_count = 0;
+    for (Player p : handler.players) {
+      alive_count = (p.is_alive) ? alive_count + 1 : alive_count;
+    }
+    if (alive_count == 0) {
+      this.setIntermission(State.GAME_OVER);
+    } else if (Settings.PVP && alive_count == 1) {
+      for (int i = 0; i < handler.players.size(); i++) {
+        if (handler.players.get(i).is_alive) {
+          setIntermission(pvp_wins[i]);
+        }
+      }
+    } else if (handler.asteroids.size() == 0) {
+      this.setIntermission(State.VICTORY);
+    }
+  }
+
   public void reset() {
-    resetKeyListener();
-    gamePanel.resetObjects();
+    state = State.GAME_STATE;
+    handler.reset = true;
+  }
+
+  public class InputListener implements KeyListener {
+    public void keyPressed(KeyEvent e) {
+      int code = e.getKeyCode();
+      if (state == State.GAME_STATE) {
+        controlPress(
+            handler.players.get(0),
+            code,
+            KeyEvent.VK_W,
+            KeyEvent.VK_A,
+            KeyEvent.VK_S,
+            KeyEvent.VK_D);
+        if (Settings.LOCAL_MULTIPLAYER) {
+          controlPress(
+              handler.players.get(1),
+              code,
+              KeyEvent.VK_UP,
+              KeyEvent.VK_LEFT,
+              KeyEvent.VK_DOWN,
+              KeyEvent.VK_RIGHT);
+          if (Settings.NUMBER_OF_PLAYERS == 3) {
+            controlPress(
+                handler.players.get(2),
+                code,
+                KeyEvent.VK_NUMPAD8,
+                KeyEvent.VK_NUMPAD4,
+                KeyEvent.VK_NUMPAD5,
+                KeyEvent.VK_NUMPAD6);
+          }
+        }
+      }
+      switch (code) {
+        case KeyEvent.VK_R:
+          reset();
+          break;
+        case KeyEvent.VK_H:
+          Settings.DRAW_HITBOXES = !Settings.DRAW_HITBOXES;
+          break;
+        case KeyEvent.VK_B:
+          Settings.DRAW_BUCKETS = !Settings.DRAW_BUCKETS;
+          break;
+        case KeyEvent.VK_N:
+          Settings.DRAW_SPRITES = !Settings.DRAW_SPRITES;
+          break;
+        case KeyEvent.VK_J:
+          Settings.DRAW_DEBUG = !Settings.DRAW_DEBUG;
+          break;
+        case KeyEvent.VK_ENTER:
+          if (state != State.GAME_STATE) {
+            reset();
+          }
+          break;
+        case KeyEvent.VK_ESCAPE:
+          setVisible(false);
+          dispose();
+          System.exit(0);
+          break;
+      }
+    }
+
+    public void keyReleased(KeyEvent e) {
+      int code = e.getKeyCode();
+      switch (state) {
+        case GAME_STATE:
+          controlRelease(
+              handler.players.get(0),
+              code,
+              KeyEvent.VK_W,
+              KeyEvent.VK_A,
+              KeyEvent.VK_S,
+              KeyEvent.VK_D);
+          if (Settings.LOCAL_MULTIPLAYER) {
+            controlRelease(
+                handler.players.get(1),
+                code,
+                KeyEvent.VK_UP,
+                KeyEvent.VK_LEFT,
+                KeyEvent.VK_DOWN,
+                KeyEvent.VK_RIGHT);
+            if (Settings.NUMBER_OF_PLAYERS == 3) {
+              controlRelease(
+                  handler.players.get(2),
+                  code,
+                  KeyEvent.VK_NUMPAD8,
+                  KeyEvent.VK_NUMPAD4,
+                  KeyEvent.VK_NUMPAD5,
+                  KeyEvent.VK_NUMPAD6);
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    public void keyTyped(KeyEvent e) {}
+
+    public void controlPress(Player p, int code, int shoot, int left, int boost, int right) {
+      if (code == shoot) {
+        p.is_shooting = true;
+      } else if (code == boost) {
+        p.is_boosting = true;
+      } else if (code == left) {
+        if (p.rotation_direction == 0) {
+          p.rotation_direction = -1;
+        } else if (p.rotation_direction == 1) {
+          p.queued_direction = -1;
+        }
+      } else if (code == right) {
+        if (p.rotation_direction == 0) {
+          p.rotation_direction = 1;
+        } else if (p.rotation_direction == -1) {
+          p.queued_direction = 1;
+        }
+      }
+    }
+
+    public void controlRelease(Player p, int code, int shoot, int left, int boost, int right) {
+      if (code == shoot) {
+        p.is_shooting = false;
+      } else if (code == boost) {
+        p.is_boosting = false;
+      } else if (code == left) {
+        if (p.rotation_direction == -1) {
+          p.rotation_direction = p.queued_direction;
+        }
+        p.queued_direction = 0;
+      } else if (code == right) {
+        if (p.rotation_direction == 1) {
+          p.rotation_direction = p.queued_direction;
+        }
+        p.queued_direction = 0;
+      }
+    }
   }
 }
