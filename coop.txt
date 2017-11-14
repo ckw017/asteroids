@@ -7,43 +7,42 @@ Number of Players (int): 2
 Local Multiplayer (boolean): 1
 LAN Multiplayer (boolean): 0
 PvP (boolean): 0
-Auto reset (boolean): 1
 Bucket size (int): 75
 
 <DISPLAY>
-Full screen (boolean): 0
+Full screen windowed (boolean): 1
+Full screen borderless (boolean): 0
+Frame rate (frames/second): 60
 Window width (pixels): 600
 Window height (pixels): 480
 Draw hitboxes (boolean): 1
 Draw sprites (boolean): 1
 Draw buckets (boolean): 1
+Draw debug (boolean): 0
 
 <ASTEROIDS>
-Asteroid split factor (int): 2
-Asteroid base speed (pixels/frame): 1
-Asteroid speed range (pixels/frame): 5
-Asteroid count (int): 8
-Float velocities (boolean): 0
+Asteroid split factor (int): 6
+Asteroid base speed (pixels/frame): .5
+Asteroid speed range (pixels/frame): 2
+Asteroid count (int): 12
 
 <PLAYER>
 Player invulnerability (bool): 0
-Player respawn (boolean): 0
-Shooting delay (frames): 2
-Player max speed (pixels per frame): 25
-Player thrust (mass*pixels/frame^2): 2
-Player friction coefficient (double): .95
+Shooting delay (frames): 6
+Player max speed (pixels per frame): 6
+Player thrust (mass*pixels/frame^2): .6
+Player friction coefficient (double): .96
 Player health (hitpoints): 1
-Player turn speed (degrees per frame): 15
+Player turn speed (degrees per frame): 8
 
 <PLAYER PROJECTILE>
-Projectile speed(pixels/frame): 10
-Projectile lifetime(frames): 50
+Projectile speed(pixels/frame): 5
+Projectile lifetime(frames): 120
 Projectile radius(pixels): 2
-Projectile health (hitpoints): 3
+Projectile health (hitpoints): 1
 
 <MISCELLANEOUS>
-Just a prank bro: 0
-Smart graphics (for stupid people): 0
 Skittle mode: 1
+Prank (boolean): 0
 Custom settings file (boolean): 0
 Setting file name (path): null
