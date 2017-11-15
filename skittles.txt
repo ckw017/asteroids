@@ -19,6 +19,7 @@ Draw hitboxes (boolean): 1
 Draw sprites (boolean): 0
 Draw buckets (boolean): 0
 Draw debug (boolean): 0
+Draw collisions (boolean): 0
 
 <ASTEROIDS>
 Asteroid split factor (int): 24

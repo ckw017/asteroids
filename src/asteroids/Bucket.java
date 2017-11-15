@@ -21,20 +21,28 @@ public class Bucket {
   public Rectangle shape;
   public Font debug_font = new Font("", Font.PLAIN, 8);
   public Font default_font = new Font("", Font.PLAIN, 12);
+  public Settings settings;
+  public int collision_count;
 
-  public Bucket(Vector position) {
+  public Bucket(Settings settings, Vector position) {
+  	this.settings = settings;
     this.position = position;
-    this.scaled_position = (new Vector(this.position)).scale(Settings.BUCKET_SIZE);
+    this.scaled_position = (new Vector(this.position)).scale(settings.BUCKET_SIZE);
     this.shape =
         new Rectangle(
-            (int) (this.position.x * Settings.BUCKET_SIZE),
-            (int) (this.position.y * Settings.BUCKET_SIZE),
-            Settings.BUCKET_SIZE - 1,
-            Settings.BUCKET_SIZE - 1);
+            (int) (this.position.x * settings.BUCKET_SIZE),
+            (int) (this.position.y * settings.BUCKET_SIZE),
+            settings.BUCKET_SIZE - 1,
+            settings.BUCKET_SIZE - 1);
     this.list_array.add(asteroids);
     this.list_array.add(projectiles);
     this.list_array.add(players);
     this.draw_color = Color.WHITE;
+    this.collision_count = 0;
+  }
+  
+  public Bucket() {
+  	this.position = new Vector(-1, -1);
   }
 
   public void add(GameObject o) {
@@ -62,7 +70,7 @@ public class Bucket {
     collideLists(this.asteroids, b.players);
     collideLists(b.asteroids, this.projectiles);
     collideLists(b.asteroids, this.players);
-    if (Settings.PVP) {
+    if (settings.PVP) {
       collideLists(this.players, b.players);
       collideLists(this.players, b.projectiles);
       collideLists(b.players, this.projectiles);
@@ -81,6 +89,7 @@ public class Bucket {
           break;
         }
         list1.get(i - 1).collide(list2.get(j - 1));
+        collision_count++;
         j = (list2.size() < j) ? list2.size() : j;
         i = (list1.size() < i) ? list1.size() : i;
       }
@@ -128,7 +137,7 @@ public class Bucket {
     g2.fill(this.shape);
     g2.setColor(this.draw_color);
     g2.draw(this.shape);
-    if (Settings.DRAW_DEBUG) {
+    if (settings.DRAW_DEBUG) {
       //paintDebug(g2);
     }
   }

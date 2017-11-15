@@ -7,7 +7,7 @@ import java.util.Random;
 public class Asteroid extends GameObject {
   private static final long serialVersionUID = -6806368405789577592L;
   public int size;
-  public int split_factor = Settings.ASTEROID_SPLIT_FACTOR;
+  public int split_factor = handler.settings.ASTEROID_SPLIT_FACTOR;
   public static Random gen = new Random();
 
   public static BufferedImage[] sprites = IOTools.loadSprites("asteroid_", 3);
@@ -19,7 +19,7 @@ public class Asteroid extends GameObject {
     this.velocity =
         new Vector(
             this.rotation,
-            Settings.ASTEROID_BASE_SPEED + gen.nextDouble() * Settings.ASTEROID_SPEED_RANGE / size,
+            handler.settings.ASTEROID_BASE_SPEED + gen.nextDouble() * handler.settings.ASTEROID_SPEED_RANGE / size,
             true);
     this.setGraphics();
     this.handler.asteroids.add(this);
@@ -36,7 +36,7 @@ public class Asteroid extends GameObject {
   }
 
   public void setGraphics() {
-    if (Settings.ASTEROID_RAINBOW) {
+    if (handler.settings.ASTEROID_RAINBOW) {
     	this.hitbox_color = generateColor(this.rotation);
     } else {
       this.hitbox_color = Color.RED;

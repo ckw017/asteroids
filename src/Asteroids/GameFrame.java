@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 @SuppressWarnings("serial")
 public class GameFrame extends JFrame {
   public ObjectHandler handler;
+  public GamePanel panel;
   public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
   public State state;
   public int counter = 0;
@@ -34,9 +35,10 @@ public class GameFrame extends JFrame {
     super();
     this.setLayout(new FlowLayout());
     this.handler = handler;
-    this.add(new GamePanel(this));
+    this.panel = new GamePanel(this);
+    this.add(panel);
     this.setTitle("Asteroids");
-    this.setSize(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT);
+    this.setSize(handler.settings.FRAME_WIDTH, handler.settings.FRAME_HEIGHT);
     this.adjustScreen();
     this.setResizable(false);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -70,10 +72,10 @@ public class GameFrame extends JFrame {
   }
 
   public void adjustScreen() {
-    if (Settings.FULL_SCREEN_WINDOWED) {
-      this.setSize(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT);
-      this.setPreferredSize(new Dimension(Settings.FRAME_WIDTH, Settings.FRAME_HEIGHT));
-    } else if (Settings.FULL_SCREEN_BORDERLESS) {
+    if (handler.settings.FULL_SCREEN_WINDOWED) {
+      this.setSize(handler.settings.FRAME_WIDTH, handler.settings.FRAME_HEIGHT);
+      this.setPreferredSize(new Dimension(handler.settings.FRAME_WIDTH, handler.settings.FRAME_HEIGHT));
+    } else if (handler.settings.FULL_SCREEN_BORDERLESS) {
       this.setExtendedState(JFrame.MAXIMIZED_BOTH);
       this.setUndecorated(true);
     } else {
@@ -97,7 +99,7 @@ public class GameFrame extends JFrame {
     this.counter++;
     if (state == State.GAME_STATE) {
       Player p1 = handler.players.get(0);
-      if (Settings.LOCAL_MULTIPLAYER) {
+      if (handler.settings.LOCAL_MULTIPLAYER) {
         multiplayerUpdate();
       } else {
         if (!p1.is_alive) {
@@ -107,12 +109,12 @@ public class GameFrame extends JFrame {
           this.setIntermission(State.VICTORY);
         }
       }
-      if (Settings.PRANK && handler.asteroids.size() == 1) {
+      if (handler.settings.PRANK && handler.asteroids.size() == 1) {
         Asteroid a = handler.asteroids.get(0);
         a.size = 2;
         a.health = 5;
         a.split_factor = 2048;
-        Settings.PRANK = false;
+        handler.settings.PRANK = false;
       }
     }
   }
@@ -124,7 +126,7 @@ public class GameFrame extends JFrame {
     }
     if (alive_count == 0) {
       this.setIntermission(State.GAME_OVER);
-    } else if (Settings.PVP && alive_count == 1) {
+    } else if (handler.settings.PVP && alive_count == 1) {
       for (int i = 0; i < handler.players.size(); i++) {
         if (handler.players.get(i).is_alive) {
           setIntermission(pvp_wins[i]);
@@ -151,7 +153,7 @@ public class GameFrame extends JFrame {
             KeyEvent.VK_A,
             KeyEvent.VK_S,
             KeyEvent.VK_D);
-        if (Settings.LOCAL_MULTIPLAYER) {
+        if (handler.settings.LOCAL_MULTIPLAYER) {
           controlPress(
               handler.players.get(1),
               code,
@@ -159,7 +161,7 @@ public class GameFrame extends JFrame {
               KeyEvent.VK_LEFT,
               KeyEvent.VK_DOWN,
               KeyEvent.VK_RIGHT);
-          if (Settings.NUMBER_OF_PLAYERS == 3) {
+          if (handler.settings.NUMBER_OF_PLAYERS == 3) {
             controlPress(
                 handler.players.get(2),
                 code,
@@ -175,17 +177,20 @@ public class GameFrame extends JFrame {
           reset();
           break;
         case KeyEvent.VK_H:
-          Settings.DRAW_HITBOXES = !Settings.DRAW_HITBOXES;
+          handler.settings.DRAW_HITBOXES ^= true;
           break;
         case KeyEvent.VK_B:
-          Settings.DRAW_BUCKETS = !Settings.DRAW_BUCKETS;
+          handler.settings.DRAW_BUCKETS ^= true;
           break;
         case KeyEvent.VK_N:
-          Settings.DRAW_SPRITES = !Settings.DRAW_SPRITES;
+          handler.settings.DRAW_SPRITES ^= true;
           break;
         case KeyEvent.VK_J:
-          Settings.DRAW_DEBUG = !Settings.DRAW_DEBUG;
+          handler.settings.DRAW_DEBUG ^= true;
           break;
+        case KeyEvent.VK_C:
+        	handler.settings.DRAW_COLLISIONS ^= true;
+        	break;
         case KeyEvent.VK_ENTER:
           if (state != State.GAME_STATE) {
             reset();
@@ -210,7 +215,7 @@ public class GameFrame extends JFrame {
               KeyEvent.VK_A,
               KeyEvent.VK_S,
               KeyEvent.VK_D);
-          if (Settings.LOCAL_MULTIPLAYER) {
+          if (handler.settings.LOCAL_MULTIPLAYER) {
             controlRelease(
                 handler.players.get(1),
                 code,
@@ -218,7 +223,7 @@ public class GameFrame extends JFrame {
                 KeyEvent.VK_LEFT,
                 KeyEvent.VK_DOWN,
                 KeyEvent.VK_RIGHT);
-            if (Settings.NUMBER_OF_PLAYERS == 3) {
+            if (handler.settings.NUMBER_OF_PLAYERS == 3) {
               controlRelease(
                   handler.players.get(2),
                   code,

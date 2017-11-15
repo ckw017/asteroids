@@ -6,62 +6,59 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Settings {
-  private static File asteroids_settings = new File("asteroids_settings.txt");
-  private static Scanner in;
+  public File asteroids_settings = new File("asteroids_settings.txt");
+  public Scanner in;
 
-  public static final String[] paths =
+  public String[] paths =
       new String[] {"asteroids_settings.txt", "coop.txt", "pvp.txt", "skittles.txt"};
   
-  public static int NUMBER_OF_PLAYERS;
-  public static boolean LOCAL_MULTIPLAYER;
-  public static boolean LAN_MULTIPLAYER;
-  public static boolean PVP;
-  public static int BUCKET_SIZE;
-  public static boolean DRAW_HITBOXES;
-  public static boolean DRAW_SPRITES;
-  public static boolean DRAW_BUCKETS;
-  public static boolean DRAW_DEBUG;
-  public static boolean FULL_SCREEN_WINDOWED;
-  public static boolean FULL_SCREEN_BORDERLESS;
-  public static double FRAME_RATE;
-  public static double ACTUAL_FRAME_RATE;
-  public static double FRAME_DELAY;
-  public static int SCREEN_WIDTH;
-  public static int SCREEN_HEIGHT;
-  public static int ASTEROID_SPLIT_FACTOR;
-  public static int ASTEROID_COUNT;
-  public static double ASTEROID_BASE_SPEED;
-  public static double ASTEROID_SPEED_RANGE;
-  public static boolean ASTEROID_RAINBOW;
-  public static boolean PLAYER_INVULNERABILITY;
-  public static double PLAYER_THRUST;
-  public static double PLAYER_FRICTION;
-  public static double PLAYER_TURN_SPEED;
-  public static double PLAYER_MAX_SPEED;
-  public static int PLAYER_SHOOT_DELAY;
-  public static int PLAYER_HEALTH;
-  public static double PROJECTILE_SPEED;
-  public static int PROJECTILE_HEALTH;
-  public static int PROJECTILE_LIFETIME;
-  public static int PROJECTILE_RADIUS;
-  public static boolean PRANK;
-  private static boolean alt_file;
-  private static String alt_file_name;
+  public int NUMBER_OF_PLAYERS;
+  public boolean LOCAL_MULTIPLAYER;
+  public boolean LAN_MULTIPLAYER;
+  public boolean PVP;
+  public int BUCKET_SIZE;
+  public boolean DRAW_HITBOXES;
+  public boolean DRAW_SPRITES;
+  public boolean DRAW_BUCKETS;
+  public boolean DRAW_DEBUG;
+  public boolean DRAW_COLLISIONS;
+  public boolean FULL_SCREEN_WINDOWED;
+  public boolean FULL_SCREEN_BORDERLESS;
+  public double FRAME_RATE;
+  public int SCREEN_WIDTH;
+  public int SCREEN_HEIGHT;
+  public int ASTEROID_SPLIT_FACTOR;
+  public int ASTEROID_COUNT;
+  public double ASTEROID_BASE_SPEED;
+  public double ASTEROID_SPEED_RANGE;
+  public boolean ASTEROID_RAINBOW;
+  public boolean PLAYER_INVULNERABILITY;
+  public double PLAYER_THRUST;
+  public double PLAYER_FRICTION;
+  public double PLAYER_TURN_SPEED;
+  public double PLAYER_MAX_SPEED;
+  public int PLAYER_SHOOT_DELAY;
+  public int PLAYER_HEALTH;
+  public double PROJECTILE_SPEED;
+  public int PROJECTILE_HEALTH;
+  public int PROJECTILE_LIFETIME;
+  public int PROJECTILE_RADIUS;
+  public boolean PRANK;
+  private boolean alt_file;
+  private String alt_file_name;
 
-  public static int FRAME_HEIGHT;
-  public static int FRAME_WIDTH;
-
-  static {
-  	setDefaults();
-    load();
+  public int FRAME_HEIGHT;
+  public int FRAME_WIDTH;
+  
+  public Settings() {
+  	this.setDefaults();
+  	this.load();
   }
 
-  public static void setDefaults() {
+  public void setDefaults() {
   	for(String p: paths) {
   		File f = new File(p);
   		if(!f.exists()) {
@@ -71,7 +68,7 @@ public class Settings {
   	}
   }
 
-  public static void load() {
+  public void load() {
     try {
       in = new Scanner(asteroids_settings);
       in.nextLine();
@@ -85,13 +82,13 @@ public class Settings {
       FULL_SCREEN_WINDOWED = nextBoolean();
       FULL_SCREEN_BORDERLESS = nextBoolean();
       FRAME_RATE = nextDouble();
-      FRAME_DELAY = 1000 / FRAME_RATE;
       SCREEN_WIDTH = nextInt();
       SCREEN_HEIGHT = nextInt();
       DRAW_HITBOXES = nextBoolean();
       DRAW_SPRITES = nextBoolean();
       DRAW_BUCKETS = nextBoolean();
       DRAW_DEBUG = nextBoolean();
+      DRAW_COLLISIONS = nextBoolean();
       ASTEROID_SPLIT_FACTOR = nextInt();
       ASTEROID_BASE_SPEED = nextDouble();
       ASTEROID_SPEED_RANGE = nextDouble();
@@ -121,14 +118,15 @@ public class Settings {
         asteroids_settings = new File(alt_file_name);
         load();
       }
-    } catch (Exception x) {
-      System.out.println("Something went wrong");
-      x.printStackTrace(System.out);
+    } catch (Exception e) {
+      System.out.println("Error while loading settings file \"" + asteroids_settings.getName() +"\"");
+      System.out.println("To reset a default file, delete it then run the jar file again.");
+      e.printStackTrace(System.out);
     	System.exit(1);
     }
   }
 
-  public static void adjustWindow() {
+  public void adjustWindow() {
     if (FULL_SCREEN_WINDOWED) {
       Rectangle winSize =
           GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -151,28 +149,25 @@ public class Settings {
     }
   }
 
-  public static int nextInt() {
+  public int nextInt() {
     while (!in.hasNextInt()) {
       in.next();
     }
     return in.nextInt();
   }
 
-  public static double nextDouble() {
+  public double nextDouble() {
     while (!in.hasNextDouble()) {
       in.next();
     }
     return in.nextDouble();
   }
 
-  public static boolean nextBoolean() {
+  public boolean nextBoolean() {
     return toBoolean(nextInt());
   }
 
-  public static boolean toBoolean(int b) {
-    if (b != 1) {
-      return false;
-    }
-    return true;
+  public boolean toBoolean(int b) {
+    return (b == 0) ? false : true;
   }
 }

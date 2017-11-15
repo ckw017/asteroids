@@ -2,7 +2,8 @@ package asteroids;
 
 public class Asteroids {
   public Asteroids() {
-    ObjectHandler objectHandler = new ObjectHandler();
+  	Settings settings = new Settings();
+    ObjectHandler objectHandler = new ObjectHandler(settings);
     GameFrame frame = new GameFrame(objectHandler);
     GameHandler gameHandler = new GameHandler(frame, objectHandler);
     gameHandler.run();

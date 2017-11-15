@@ -9,9 +9,11 @@ public class ObjectHandler {
   public ArrayList<Projectile> projectiles;
   public ArrayList<Player> players;
   public CollisionHandler collision_handler;
+  public Settings settings;
   public boolean reset;
 
-  public ObjectHandler() {
+  public ObjectHandler(Settings settings) {
+  	this.settings = settings;
     this.asteroids = new ArrayList<Asteroid>();
     this.projectiles = new ArrayList<Projectile>();
     this.players = new ArrayList<Player>();
@@ -22,29 +24,29 @@ public class ObjectHandler {
   }
 
   public void spawnPlayers() {
-    if (Settings.LOCAL_MULTIPLAYER) {
-      assert Settings.NUMBER_OF_PLAYERS > 1 : "Local Multiplayer requires more than 1 player";
-      if (Settings.NUMBER_OF_PLAYERS == 2) {
+    if (settings.LOCAL_MULTIPLAYER) {
+      assert settings.NUMBER_OF_PLAYERS > 1 : "Local Multiplayer requires more than 1 player";
+      if (settings.NUMBER_OF_PLAYERS == 2) {
         players.add(
-            new Player(this, new Vector(Settings.SCREEN_WIDTH / 4, Settings.SCREEN_HEIGHT / 2), 1));
-        players.add(
-            new Player(
-                this, new Vector(Settings.SCREEN_WIDTH * 3 / 4, Settings.SCREEN_HEIGHT / 2), 2));
-      } else if (Settings.NUMBER_OF_PLAYERS == 3) {
-        players.add(
-            new Player(this, new Vector(Settings.SCREEN_WIDTH / 4, Settings.SCREEN_HEIGHT / 4), 1));
+            new Player(this, new Vector(settings.SCREEN_WIDTH / 4, settings.SCREEN_HEIGHT / 2), 1));
         players.add(
             new Player(
-                this, new Vector(Settings.SCREEN_WIDTH * 3 / 4, Settings.SCREEN_HEIGHT / 4), 2));
+                this, new Vector(settings.SCREEN_WIDTH * 3 / 4, settings.SCREEN_HEIGHT / 2), 2));
+      } else if (settings.NUMBER_OF_PLAYERS == 3) {
+        players.add(
+            new Player(this, new Vector(settings.SCREEN_WIDTH / 4, settings.SCREEN_HEIGHT / 4), 1));
         players.add(
             new Player(
-                this, new Vector(Settings.SCREEN_WIDTH / 2, Settings.SCREEN_HEIGHT * 3 / 4), 3));
+                this, new Vector(settings.SCREEN_WIDTH * 3 / 4, settings.SCREEN_HEIGHT / 4), 2));
+        players.add(
+            new Player(
+                this, new Vector(settings.SCREEN_WIDTH / 2, settings.SCREEN_HEIGHT * 3 / 4), 3));
       }
-    } else if (Settings.LAN_MULTIPLAYER) {
+    } else if (settings.LAN_MULTIPLAYER) {
 
     } else {
       players.add(
-          new Player(this, new Vector(Settings.SCREEN_WIDTH / 2, Settings.SCREEN_HEIGHT / 2), 1));
+          new Player(this, new Vector(settings.SCREEN_WIDTH / 2, settings.SCREEN_HEIGHT / 2), 1));
     }
   }
 
@@ -79,10 +81,10 @@ public class ObjectHandler {
 
   public void generateAsteroids() {
     Vector[] centers = getPlayerCenters();
-    for (int i = 0; i < Settings.ASTEROID_COUNT; i++) {
+    for (int i = 0; i < settings.ASTEROID_COUNT; i++) {
       while (true) {
-        double x = gen.nextDouble() * Settings.FRAME_WIDTH;
-        double y = gen.nextDouble() * Settings.FRAME_HEIGHT;
+        double x = gen.nextDouble() * settings.FRAME_WIDTH;
+        double y = gen.nextDouble() * settings.FRAME_HEIGHT;
         Vector v = new Vector(x, y);
         boolean valid = true;
         for (Vector c : centers) {

@@ -27,8 +27,8 @@ public class Player extends GameObject {
     this.velocity = new Vector();
     this.setGraphics();
     this.rotation = -Math.PI / 2;
-    this.health = Settings.PLAYER_HEALTH;
-    this.is_invulnerable = Settings.PLAYER_INVULNERABILITY;
+    this.health = handler.settings.PLAYER_HEALTH;
+    this.is_invulnerable = handler.settings.PLAYER_INVULNERABILITY;
   }
 
   public void setGraphics() {
@@ -43,7 +43,7 @@ public class Player extends GameObject {
   }
 
   public void shoot() {
-    if (this.shot_counter > Settings.PLAYER_SHOOT_DELAY && this.is_shooting) {
+    if (this.shot_counter > handler.settings.PLAYER_SHOOT_DELAY && this.is_shooting) {
       this.shot_counter = 0;
       new Projectile(this);
     }
@@ -52,12 +52,12 @@ public class Player extends GameObject {
 
   public void boost() {
     if (this.is_boosting) {
-      this.velocity.add(new Vector(this.rotation, Settings.PLAYER_THRUST, true));
-      if (this.velocity.magnitude() > Settings.PLAYER_MAX_SPEED) {
-        this.velocity.setMagnitude(Settings.PLAYER_MAX_SPEED);
+      this.velocity.add(new Vector(this.rotation, handler.settings.PLAYER_THRUST, true));
+      if (this.velocity.magnitude() > handler.settings.PLAYER_MAX_SPEED) {
+        this.velocity.setMagnitude(handler.settings.PLAYER_MAX_SPEED);
       }
     } else {
-      this.velocity.scale(Settings.PLAYER_FRICTION);
+      this.velocity.scale(handler.settings.PLAYER_FRICTION);
     }
   }
 
@@ -66,7 +66,7 @@ public class Player extends GameObject {
       super.update();
       this.shoot();
       this.boost();
-      this.rotation += this.rotation_direction * Math.toRadians(Settings.PLAYER_TURN_SPEED);
+      this.rotation += this.rotation_direction * Math.toRadians(handler.settings.PLAYER_TURN_SPEED);
       this.rotation %= Math.PI * 2;
     }
   }
@@ -77,11 +77,11 @@ public class Player extends GameObject {
     this.is_alive = true;
     this.curr_bucket.players.remove(this);
     this.curr_bucket = null_bucket;
-    this.health = Settings.PLAYER_HEALTH;
+    this.health = handler.settings.PLAYER_HEALTH;
     this.rotation = -Math.PI / 2;
     this.is_shooting = false;
     this.is_boosting = false;
-    this.is_invulnerable = Settings.PLAYER_INVULNERABILITY;
+    this.is_invulnerable = handler.settings.PLAYER_INVULNERABILITY;
     this.rotation_direction = 0;
   }
 
@@ -107,7 +107,7 @@ public class Player extends GameObject {
   public void paintComponent(Graphics g) {
     if (this.is_alive) {
       super.paintComponent(g);
-      if (Settings.DRAW_HITBOXES) {
+      if (handler.settings.DRAW_HITBOXES) {
       	int start_x = (int)(this.position.x + Math.cos(this.rotation) * (this.radius - 6));
       	int start_y = (int)(this.position.y + Math.sin(this.rotation) * (this.radius - 6));
         int end_x = (int)(this.position.x + Math.cos(this.rotation) * this.radius);
