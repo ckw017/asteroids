@@ -10,8 +10,8 @@ PvP (boolean): 0
 Bucket size (int): 45
 
 <DISPLAY>
-Full screen windowed (boolean): 0
-Full screen borderless (boolean): 1
+Full screen windowed (boolean): 1
+Full screen borderless (boolean): 0
 Frame rate (frames/second): 60
 Window width (pixels): 600
 Window height (pixels): 480

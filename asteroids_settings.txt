@@ -45,5 +45,5 @@ Projectile health (hitpoints): 1
 <MISCELLANEOUS>
 Skittle mode: 0
 Prank (boolean): 1
-Custom settings file (boolean): 1
+Custom settings file (boolean): 0
 Setting file name (path): skittles.txt
